@@ -25,7 +25,7 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
-a {
+div {
   color: rgb(var(--foreground-rgb));
   text-decoration: none;
   font-size: 50px;
