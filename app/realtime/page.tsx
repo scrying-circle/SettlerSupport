@@ -2,6 +2,7 @@
 import './styles.css'
 import Link from 'next/link'
 import { use, useEffect, useRef, useState } from 'react'
+import { useAudioPlayer } from 'react-use-audio-player';
 export default function RealTime() {
     const [white_face, setWhiteFace] = useState('w1.svg')
     const [red_face, setRedFace] = useState('r1.svg')
@@ -9,32 +10,31 @@ export default function RealTime() {
     const [rolling, setRolling] = useState(false)
     const [button_text, setButtonText] = useState('Start')
     const alchemist = useRef(false)
+    const [alchemist_button, setAlchemistButton] = useState(false)
+    const bg_color_options = ['#f87171', 'orange', 'yellow', 'green', 'blue', 'purple', 'black']
     const turn_count = useRef(0)
-    const barbarian_count = useRef(0)
+    const turn_time = useRef(0)
+    const timeStart = useRef(-1);
+    const prevTime = useRef(-1);
+    const [turn_percent, setTurnPercent] = useState(100)
     const [skip, setSkip] = useState(false)
     const limits = 5
-    let period: NodeJS.Timeout;
-    /*
-    const [twos, setTwos] = useState(0)
-    const [threes, setThrees] = useState(0)
-    const [fours, setFours] = useState(0)
-    const [fives, setFives] = useState(0)
-    const [sixes, setSixes] = useState(0)
-    const [sevens, setSevens] = useState(0)
-    const [eights, setEights] = useState(0)
-    const [nines, setNines] = useState(0)
-    const [tens, setTens] = useState(0)
-    const [elevens, setElevens] = useState(0)
-    const [twelves, setTwelves] = useState(0)
-    */
+    const period = useRef(setTimeout(() => {}, 0))
+    const bg_animation_id = useRef(0)
+    const [bg_colors, setBgColors] = useState([6, 0])
+    const pause_time = useRef(-1)
+    const track = useRef([false, false, false, false, false, false, false])
+    const track_finished = useRef(false)
+    const { load } = useAudioPlayer()
+
     function time(turns: number) {
-        let period = 30
+        let period = 5
         return period * 1000
     }
-    function create_deck(remove=0) {
+    function create_deck(remove: number=0) {
         let output = []
-        for (let i = 1; i < 7; i++) {
-            for (let j = 1; j < 7; j++) {
+        for (let i = 1; i <= 6; i++) {
+            for (let j = 1; j <= 6; j++) {
                 output.push([i, j])
             }
         }
@@ -46,121 +46,122 @@ export default function RealTime() {
 
     const [deck, setDeck] = useState(create_deck(Math.floor(Math.random() * limits)))
 
+    function bg_animation(timeStamp: number) {
+        if (timeStart.current == -1) {
+            timeStart.current = timeStamp
+            setBgColors(bg_colors.reverse())
+        }
+        if (prevTime.current != timeStamp) {
+            turn_time.current = Math.min(timeStamp - timeStart.current, time(turn_count.current));
+            setTurnPercent(turn_time.current / time(turn_count.current) * 100)
+            if (turn_time.current < time(turn_count.current)) {
+                bg_animation_id.current = window.requestAnimationFrame(bg_animation);
+            } else {                
+                timeStart.current = -1;
+                prevTime.current = -1;
+                turn_time.current = 0;
+                window.cancelAnimationFrame(bg_animation_id.current)
+            }
+            prevTime.current = timeStamp;
+        }
+    }
+
+
+
     function get_roll(stack: Array<Array<number>>) {
         let roll = stack[Math.floor(Math.random() * stack.length)]
         stack.splice(stack.indexOf(roll), 1)
         if (stack.length == 0) {
-            if (Math.random() < 0.5) {
-                stack = create_deck()
-            } else {
-                stack = [[Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]]
-            }
+            stack = create_deck()
         }
         setDeck(stack)
         return roll
     }
     function get_event() {
-        let event = Math.floor(Math.random() * 6)
-        if (event == 0) {
-            return 'yellow'
-        } else if (event == 1) {
-            return 'blue'
-        } else if (event == 2) {
-            return 'green'
-        } else {
-            return 'ship'
-        }
-    }
-
-    function roll_to_svg(white: number, red: number, event: string) {
-        return [`w${white}.svg`, `r${red}.svg`, `${event}.svg`]
+        const events = ['yellow', 'blue', 'green', 'ship', 'ship', 'ship']
+        return events[Math.floor(Math.random() * events.length)]
     }
 
     function roll() {
+        timeStart.current = -1;
+        prevTime.current = -1;
+        turn_time.current = 0;
+        window.cancelAnimationFrame(bg_animation_id.current)
+        bg_animation_id.current = window.requestAnimationFrame(bg_animation)
+        load('/bell.wav', {
+            autoplay: true,
+            initialVolume: 2
+        })
         let white = 0
         let red = 0
-        if (!alchemist.current) {
-            [white, red] = get_roll(deck)
-        } else {
-            alchemist.current = false
-        }
         let event = get_event()
-        if (event == 'ship') {
-            barbarian_count.current += 1
+        if (track_finished.current) {
+            track.current = [false, false, false, false, false, false, false]
+            track_finished.current = false
         }
-        let faces = roll_to_svg(white, red, event)
-        setWhiteFace(faces[0])
-        setRedFace(faces[1])
-        setEventFace(faces[2])
+        if (event == 'ship') {
+            let ship_position = track.current.indexOf(false)
+            track.current[ship_position] = true
+            if (ship_position == 6) {
+                track_finished.current = true
+            }
+        }
+        alchemist.current ? alchemist.current = false : [white, red] = get_roll(deck)
+        setWhiteFace(`w${white}.svg`)
+        setRedFace(`r${red}.svg`)
+        setEventFace(`${event}.svg`)
+        setAlchemistButton(false)
         turn_count.current += 1
 
-        /*
-        if (white + red == 2) {
-            setTwos(twos + 1)
-        } else if (white + red == 3) {
-            setThrees(threes + 1)
-        } else if (white + red == 4) {
-            setFours(fours + 1)
-        } else if (white + red == 5) {
-            setFives(fives + 1)
-        } else if (white + red == 6) {
-            setSixes(sixes + 1)
-        } else if (white + red == 7) {
-            setSevens(sevens + 1)
-        } else if (white + red == 8) {
-            setEights(eights + 1)
-        } else if (white + red == 9) {
-            setNines(nines + 1)
-        } else if (white + red == 10) {
-            setTens(tens + 1)
-        } else if (white + red == 11) {
-            setElevens(elevens + 1)
-        } else if (white + red == 12) {
-            setTwelves(twelves + 1)
-        }
-        */
     }
-    let prep_roll = () => {
+    function prep_roll() {
         roll()
-        period = setTimeout(prep_roll, time(turn_count.current))
+        period.current = setTimeout(prep_roll, time(turn_count.current))
     }
+
     useEffect(() => {
         if (rolling) {
             setButtonText('Pause')
-            if (skip) {
-                roll()
-                setSkip(false)
+            if (pause_time.current == -1) {
+                pause_time.current = performance.now()
             }
-            period = setTimeout(prep_roll, time(turn_count.current))
-            return () => clearTimeout(period)
+            timeStart.current += performance.now() - pause_time.current
+            let remaining_time = time(turn_count.current) - turn_time.current
+            period.current = setTimeout(prep_roll, remaining_time)
+            bg_animation_id.current = window.requestAnimationFrame(bg_animation)
+            return () => clearTimeout(period.current)
         } else {
             setButtonText('Start')
+            window.cancelAnimationFrame(bg_animation_id.current)
+            if (pause_time.current != -1) pause_time.current = performance.now()
         }
-    }, [rolling, skip])
+    }, [rolling])
 
+    useEffect(() => {
+        if (skip && rolling) {
+            roll()
+            clearTimeout(period.current)
+            period.current = setTimeout(prep_roll, time(turn_count.current))
+        }
+        setSkip(false)
+    }, [skip])
     return (
-        <main className="flex min-h-screen flex-col items-center justify-around p-24">
+        <main className={`flex min-h-screen flex-col items-center justify-around p-24 -z-10`} style={{background: `linear-gradient(to right, ${bg_color_options[bg_colors[0]]} ${turn_percent}%, ${bg_color_options[bg_colors[1]]} ${turn_percent}%)`}}>
             <Link href="/" className='absolute top-10 left-10'>←</Link>
-            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly">
+            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly z-0">
                  <div>Turn Count: {turn_count.current}</div>
-                 <div>Barbarian Rating: {Math.round(barbarian_count.current*20/turn_count.current)/10}</div>
+                 <div className='w-1/3 min-h-fit z-5'>
+                    <div className='border-solid border-4 border-slate-50 rounded-full w-20 h-20 bg-stone-800/80 absolute left-[50%] top-[11.6%]'/>
+                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[55%] top-[18.3%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[0] ? 0.8: 0.3})`, borderColor: `${track.current[0] ? '#292524': '#f8fafc'}`}}/>
+                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[60%] top-[25%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[1] ? 0.8: 0.3})`, borderColor: `${track.current[1] ? '#292524': '#f8fafc'}`}}/>
+                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[65%] top-[18.3%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[2] ? 0.8: 0.3})`, borderColor: `${track.current[2] ? '#292524': '#f8fafc'}`}}/>
+                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[70%] top-[11.6%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[3] ? 0.8: 0.3})`, borderColor: `${track.current[3] ? '#292524': '#f8fafc'}`}}/>
+                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[75%] top-[5%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[4] ? 0.8: 0.3})`, borderColor: `${track.current[4] ? '#292524': '#f8fafc'}`}}/>
+                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[80%] top-[11.6%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[5] ? 0.8: 0.3})`, borderColor: `${track.current[5] ? '#292524': '#f8fafc'}`}}/>
+                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[85%] top-[18.3%]'} style={{backgroundColor: `rgba(252, 211, 77, ${track.current[6] ? 0.8: 0.3})`, borderColor: `${track.current[6] ? '#292524': '#f8fafc'}`}}/>
+                 </div>
             </div>
-    {/*
-            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly">
-                <div>2: {twos}</div>
-                <div>3: {threes}</div>
-                <div>4: {fours}</div>
-                <div>5: {fives}</div>
-                <div>6: {sixes}</div>
-                <div>7: {sevens}</div>
-                <div>8: {eights}</div>
-                <div>9: {nines}</div>
-                <div>10: {tens}</div>
-                <div>11: {elevens}</div>
-                <div>12: {twelves}</div>
-            </div>
-    */}
-            <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly">
+            <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly z-0">
                 <div className="scale-50 w-1/3 h-1/3">
                     <img src={white_face} alt='white_face.jpg'/>
                 </div>
@@ -172,9 +173,9 @@ export default function RealTime() {
                     <img className='absolute top-0 scale-50' src={event_face} alt='event_face.jpg'/>
                 </div>
             </div>
-            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly">
+            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly z-0">
                 <button onClick={_ => setRolling(!rolling)}>{button_text}</button>
-                <button onClick={_ => alchemist.current = true}>Alchemist</button>
+                <button className={`${alchemist_button ? 'text-green-500': 'text-gray-500'}`} onClick={_ => {setAlchemistButton(true); alchemist.current = true}}>Alchemist</button>
                 <button onClick={_ => setSkip(true)}>Next Roll</button>
             </div>
         </main>
