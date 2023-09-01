@@ -87,7 +87,7 @@ export default function TurnBased() {
             <Link href="/" className='absolute top-10 left-10'>←</Link>
             <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly">
                  <div>Turn Count: {turn_count}</div>
-                 <div>Barbarian Rating: {Math.round(barbarian_count*20/turn_count)/10}</div>
+                 <div>Barbarian Rating: {turn_count != 0 ? Math.round(barbarian_count*20/turn_count)/10: 0}</div>
             </div>
 
             <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly z-0">

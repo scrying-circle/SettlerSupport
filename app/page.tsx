@@ -15,10 +15,10 @@ export default function Home() {
   }, [])
   return (
     <main className="flex min-h-screen flex-col items-center justify-around p-24">
-      <Link className='text-[5vh]' href="/realtime">Real Time</Link>
-      <Link className='text-[5vh]' href="/turnbased">Turn by Turn</Link>
-      <Link className='text-[5vh]' href="/stats">Game Stats</Link>
-      <Link className='text-[5vh]' href="/settings">Settings</Link>
+      <Link href="/realtime">Real Time</Link>
+      <Link href="/turnbased">Turn by Turn</Link>
+      <Link href="/stats">Game Stats</Link>
+      <Link href="/settings">Settings</Link>
     </main>
   )
 }
