@@ -7,7 +7,8 @@ export default function RealTime() {
         volume: 5.0,
         bg_primary_color: '#000000',
         bg_secondary_color: '#93c5fd',
-        turn_length_formula: '30 + t*0'
+        turn_length_formula: '30 + t*0',
+        fair_dice: false
     })
     useEffect(() => {
         const stored_defaults = localStorage.getItem('settings')
@@ -70,16 +71,21 @@ export default function RealTime() {
         return eval(settings['turn_length_formula']) * 1000
     }
     function create_deck(remove: number=0) {
-        let output = []
-        for (let i = 1; i <= 6; i++) {
-            for (let j = 1; j <= 6; j++) {
-                output.push([i, j])
+        if (settings['fair_dice']) {
+            let output = []
+            for (let i = 1; i <= 6; i++) {
+                for (let j = 1; j <= 6; j++) {
+                    output.push([i, j])
+                }
             }
+            for (let i = 0; i < remove; i++) {
+                output.splice(Math.floor(Math.random() * output.length), 1)
+            }
+            return output
+        } else {
+            return [[Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]]
         }
-        for (let i = 0; i < remove; i++) {
-            output.splice(Math.floor(Math.random() * output.length), 1)
-        }
-        return output
+        
     }
 
     const deck = useRef(create_deck(Math.floor(Math.random() * limits)))

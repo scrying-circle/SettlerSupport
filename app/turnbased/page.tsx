@@ -8,6 +8,13 @@ export default function TurnBased() {
     const [turn_count, setTurnCount] = useState(0)
     const [barbarian_count, setBarbarianCount] = useState(0)
     const limits = 5
+    const [settings, setSettings] = useState({
+        volume: 5.0,
+        bg_primary_color: '#000000',
+        bg_secondary_color: '#93c5fd',
+        turn_length_formula: '30 + t*0',
+        fair_dice: false
+    })
     function create_deck(remove=0) {
         let output = []
         for (let i = 1; i < 7; i++) {
@@ -24,17 +31,22 @@ export default function TurnBased() {
     const [deck, setDeck] = useState(create_deck(Math.floor(Math.random() * limits)))
 
     function get_roll(stack: Array<Array<number>>) {
-        let roll = stack[Math.floor(Math.random() * stack.length)]
-        stack.splice(stack.indexOf(roll), 1)
-        if (stack.length == 0) {
-            if (Math.random() < 0.5) {
-                stack = create_deck()
-            } else {
-                stack = [[Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]]
+        if (settings['fair_dice']) {
+            let roll = stack[Math.floor(Math.random() * stack.length)]
+            stack.splice(stack.indexOf(roll), 1)
+            if (stack.length == 0) {
+                if (Math.random() < 0.5) {
+                    stack = create_deck()
+                } else {
+                    stack = [[Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]]
+                }
             }
+            setDeck(stack)
+            return roll
+        } else {
+            return [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]
         }
-        setDeck(stack)
-        return roll
+        
     }
     function get_event() {
         let event = Math.floor(Math.random() * 6)
@@ -78,6 +90,10 @@ export default function TurnBased() {
     }
     useEffect(() => {
         sessionStorage.setItem('scores', JSON.stringify([]))
+        let stored_settings = localStorage.getItem('settings')
+        if (stored_settings) {
+            setSettings(JSON.parse(stored_settings))
+        }
     }, [])
 
 

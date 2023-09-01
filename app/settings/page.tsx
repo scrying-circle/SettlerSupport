@@ -9,12 +9,13 @@ export default function Settings() {
         volume: 5.0,
         bg_primary_color: '#000000',
         bg_secondary_color: '#93c5fd',
-        turn_length_formula: '30 + t*0'
+        turn_length_formula: '30 + t*0',
+        fair_dice: true
     }
     const [settings, setSettings] = useState(defaults);
-    function change_settings(field: string, value: number | string) {
+    function change_settings(field: string, value: number | string | boolean) {
         let temp: {
-            [key: string]: number | string
+            [key: string]: number | string | boolean
         } = settings;
         temp[field] = value;
         setSettings({...settings, ...temp});
@@ -56,6 +57,10 @@ export default function Settings() {
             <div className='flex flex-row items-center'>
                 <div className='pr-5'>Turn Length by Turn Count(t) = </div>
                 <input className='text-black text-lg w-50 border-radius-5 border-white' placeholder={`Default: ${defaults['turn_length_formula']}`} type='text' onInput={(e) => {change_settings('turn_length_formula', (e.target as HTMLInputElement).value)}}/>
+            </div>
+            <div className='flex flex-row items-center'>
+                <div className='pr-5'>Fair Dice: </div>
+                <button onClick={_ => change_settings('fair_dice', !settings['fair_dice'])}>{settings['fair_dice'] ? 'Yes': 'No'}</button>
             </div>
         </main> 
     )
