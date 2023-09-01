@@ -90,16 +90,15 @@ export default function TurnBased() {
                  <div>Barbarian Rating: {Math.round(barbarian_count*20/turn_count)/10}</div>
             </div>
 
-            <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly">
-                <div className="scale-50 w-1/3 h-1/3">
-                    <img src={white_face} alt='white_face.jpg'/>
+            <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly z-0">
+                <div className="items-center relative" style={{width: '30vh', height: '30vh'}}>
+                    <img className='m-0 absolute bottom-[50%] right-[50%] translate-x-1/2 translate-y-1/2 w-full h-full' src={white_face} alt='white_face.jpg'/>
                 </div>
-                <div className="scale-50 w-1/3 h-1/3">
-                    <img src={red_face} alt='red_face.jpg'/>
+                <div className="items-center relative" style={{width: '30vh', height: '30vh'}}>
+                    <img className='m-0 absolute bottom-[50%] right-[50%] translate-x-1/2 translate-y-1/2 w-full h-full' src={red_face} alt='red_face.jpg'/>
                 </div>
-                <div className="scale-50 w-1/3 h-1/3">
-                    <img src='bg.svg' alt='background'/>
-                    <img className='absolute top-0 scale-50' src={event_face} alt='event_face.jpg'/>
+                <div className="items-center bg-[url('/bg.svg')] bg-cover text-center bg-center relative" style={{width: '30vh', height: '30vh'}}>
+                    <img className='m-0 absolute bottom-[50%] right-[50%] translate-x-1/2 translate-y-1/2' style={{width: '20vh', height: '20vh'}} src={event_face} alt='event_face.jpg'/>
                 </div>
             </div>
             <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly">
