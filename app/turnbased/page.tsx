@@ -1,5 +1,4 @@
 'use client';
-import './styles.css'
 import Link from 'next/link'
 import { use, useEffect, useState } from 'react'
 export default function TurnBased() {

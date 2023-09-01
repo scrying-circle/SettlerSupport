@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link'
-import './styles.css'
 import { useEffect, useRef, useState } from 'react';
 export default function Settings() {
     const [data, setData] = useState([])

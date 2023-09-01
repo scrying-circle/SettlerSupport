@@ -1,5 +1,4 @@
 'use client';
-import './styles.css'
 import Link from 'next/link'
 import { use, useEffect, useRef, useState } from 'react'
 import { useAudioPlayer } from 'react-use-audio-player';
