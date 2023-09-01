@@ -4,6 +4,19 @@ import Link from 'next/link'
 import { use, useEffect, useRef, useState } from 'react'
 import { useAudioPlayer } from 'react-use-audio-player';
 export default function RealTime() {
+    const [settings, setSettings] = useState({
+        volume: 5.0,
+        bg_primary_color: '#000000',
+        bg_secondary_color: '#93c5fd',
+        turn_length_formula: '30 + t*0'
+    })
+    useEffect(() => {
+        const stored_defaults = localStorage.getItem('settings')
+        if (stored_defaults) {
+            setSettings(JSON.parse(stored_defaults))
+        }
+        console.log(settings)
+    }, [])
     const [white_face, setWhiteFace] = useState('w1.svg')
     const [red_face, setRedFace] = useState('r1.svg')
     const [event_face, setEventFace] = useState('yellow.svg')
@@ -11,25 +24,49 @@ export default function RealTime() {
     const [button_text, setButtonText] = useState('Start')
     const alchemist = useRef(false)
     const [alchemist_button, setAlchemistButton] = useState(false)
-    const bg_color_options = ['#f87171', 'orange', 'yellow', 'green', 'blue', 'purple', 'black']
+
+
     const turn_count = useRef(0)
     const turn_time = useRef(0)
     const timeStart = useRef(-1);
     const prevTime = useRef(-1);
     const [turn_percent, setTurnPercent] = useState(100)
+
+
     const [skip, setSkip] = useState(false)
     const limits = 5
+
     const period = useRef(setTimeout(() => {}, 0))
     const bg_animation_id = useRef(0)
-    const [bg_colors, setBgColors] = useState([6, 0])
     const pause_time = useRef(-1)
+    const bg_color_options = [settings['bg_primary_color'], settings['bg_secondary_color']]
+    const [bg_colors, setBgColors] = useState([0, 1])
+
     const track = useRef([false, false, false, false, false, false, false])
     const track_finished = useRef(false)
+    const track_positions = [[55, 18.3], [60, 25], [65, 18.3], [70, 11.6], [75, 5], [80, 11.6], [85, 18.3]]
     const { load } = useAudioPlayer()
-
-    function time(turns: number) {
-        let period = 5
-        return period * 1000
+    
+    function getTrackStyle(index: number) {
+        return {
+            backgroundColor: `${track.current[index] ? 'rgba(248, 113, 113, 0.5)': (index == 6 ? 'rgba(252, 211, 77, 0.3)': 'rgba(203, 213, 225, 0.3)')}`,
+            borderColor: `${track.current[index] ? (index == 6 ? '#fcd34d': '#292524'): '#f8fafc'}`,
+            left: `${track_positions[index][0]}%`,
+            top: `${track_positions[index][1]}%`
+        }
+    }
+    function createTrackSegment(index: number) {
+        return (
+            <div className={`border-solid border-4 rounded-full w-20 h-20 absolute`} style={getTrackStyle(index)}/>
+        )
+    }
+    function Track() {
+        return (
+            [...Array(7).keys()].map((i) => createTrackSegment(i))
+        )
+    }
+    function time(t: number) {
+        return eval(settings['turn_length_formula']) * 1000
     }
     function create_deck(remove: number=0) {
         let output = []
@@ -90,7 +127,7 @@ export default function RealTime() {
         bg_animation_id.current = window.requestAnimationFrame(bg_animation)
         load('/bell.wav', {
             autoplay: true,
-            initialVolume: 2
+            initialVolume: settings['volume']
         })
         let white = 0
         let red = 0
@@ -106,13 +143,24 @@ export default function RealTime() {
                 track_finished.current = true
             }
         }
-        alchemist.current ? alchemist.current = false : [white, red] = get_roll(deck)
+        
+        if (!alchemist.current) {
+            [white, red] = get_roll(deck)
+            
+        } else {
+            alchemist.current = false
+        }
         setWhiteFace(`w${white}.svg`)
         setRedFace(`r${red}.svg`)
         setEventFace(`${event}.svg`)
         setAlchemistButton(false)
         turn_count.current += 1
-
+        let current_score = sessionStorage.getItem('scores')
+        if (current_score) {
+            let scores = JSON.parse(current_score)
+            scores.push(white + red)
+            sessionStorage.setItem('scores', JSON.stringify(scores))
+        }
     }
     function prep_roll() {
         roll()
@@ -145,6 +193,11 @@ export default function RealTime() {
         }
         setSkip(false)
     }, [skip])
+
+    useEffect(() => {
+        sessionStorage.setItem('scores', JSON.stringify([]))
+    }, [])
+
     return (
         <main className={`flex min-h-screen flex-col items-center justify-around p-24 -z-10`} style={{background: `linear-gradient(to right, ${bg_color_options[bg_colors[0]]} ${turn_percent}%, ${bg_color_options[bg_colors[1]]} ${turn_percent}%)`}}>
             <Link href="/" className='absolute top-10 left-10'>←</Link>
@@ -152,13 +205,7 @@ export default function RealTime() {
                  <div>Turn Count: {turn_count.current}</div>
                  <div className='w-1/3 min-h-fit z-5'>
                     <div className='border-solid border-4 border-slate-50 rounded-full w-20 h-20 bg-stone-800/80 absolute left-[50%] top-[11.6%]'/>
-                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[55%] top-[18.3%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[0] ? 0.8: 0.3})`, borderColor: `${track.current[0] ? '#292524': '#f8fafc'}`}}/>
-                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[60%] top-[25%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[1] ? 0.8: 0.3})`, borderColor: `${track.current[1] ? '#292524': '#f8fafc'}`}}/>
-                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[65%] top-[18.3%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[2] ? 0.8: 0.3})`, borderColor: `${track.current[2] ? '#292524': '#f8fafc'}`}}/>
-                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[70%] top-[11.6%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[3] ? 0.8: 0.3})`, borderColor: `${track.current[3] ? '#292524': '#f8fafc'}`}}/>
-                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[75%] top-[5%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[4] ? 0.8: 0.3})`, borderColor: `${track.current[4] ? '#292524': '#f8fafc'}`}}/>
-                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[80%] top-[11.6%]'} style={{backgroundColor: `rgba(203, 213, 225, ${track.current[5] ? 0.8: 0.3})`, borderColor: `${track.current[5] ? '#292524': '#f8fafc'}`}}/>
-                    <div className={'border-solid border-4 rounded-full w-20 h-20 absolute left-[85%] top-[18.3%]'} style={{backgroundColor: `rgba(252, 211, 77, ${track.current[6] ? 0.8: 0.3})`, borderColor: `${track.current[6] ? '#292524': '#f8fafc'}`}}/>
+                    <Track />
                  </div>
             </div>
             <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly z-0">

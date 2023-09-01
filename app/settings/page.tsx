@@ -1,27 +1,52 @@
 'use client';
 import Link from 'next/link'
 import { useAudioPlayer } from 'react-use-audio-player';
+import { useEffect, useRef, useState } from 'react';
 export default function Settings() {
     const { load } = useAudioPlayer()
-    const defaults = {
-        volume: 2.0,
-        bg_primary_color: '#f87171',
-        bg_secondary_color: 'black'
+    const stored_defaults = localStorage.getItem('settings')
+    const defaults = stored_defaults ? JSON.parse(stored_defaults) : {
+        volume: 5.0,
+        bg_primary_color: '#000000',
+        bg_secondary_color: '#93c5fd',
+        turn_length_formula: '30 + t*0'
     }
-    let settings = defaults;
+    const [settings, setSettings] = useState(defaults);
+    function change_settings(field: string, value: number | string) {
+        let temp: {
+            [key: string]: number | string
+        } = settings;
+        temp[field] = value;
+        setSettings({...settings, ...temp});
+    }
+    useEffect(() => {
+        localStorage.setItem('settings', JSON.stringify(settings))
+        console.log(localStorage.getItem('settings'))
+    }, [settings])
     return (
-        <main className="flex min-h-screen flex-col items-center justify-around p-24">
+        <main className="flex min-h-screen flex-col items-center place-content-evenly p-24">
             <Link href="/" className='absolute top-10 left-10'>←</Link>
-            <div className='flex min-w-fit min-h-fit flex-row items-center justify-around p-24'>
-                <div>Volume: </div>
-                <input className='text-black' type='number' onInput={(e) => {settings['volume'] = parseFloat((e.target as HTMLInputElement).value)}}></input>
-                <button onClick={() => {
+            <div className='flex flex-row items-center'>
+                <div className='pr-5'>Volume</div>
+                <input className='text-black text-xs w-20 border-radius-5 border-white' placeholder={`Default: ${defaults['volume']}`} type='number' onInput={(e) => {change_settings('volume', parseFloat((e.target as HTMLInputElement).value))}}/>
+                <img className='ml-5 border-2 border-white w-7 h-7 cursor-pointer' src='\speaker.svg' onClick={() => {
                     load('/bell.wav', {
                     autoplay: true,
                     initialVolume: settings['volume']
                 })}
-                }>
-                    🔊</button>
+                }></img>
+            </div>
+            <div className='flex flex-row items-center'>
+                <div className='pr-5'>Primary Background Colour</div>
+                <input className='border-2 border-white cursor-pointer' value={`${settings['bg_primary_color']}`} type='color' onInput={(e) => {change_settings('bg_primary_color', (e.target as HTMLInputElement).value)}}/>
+            </div>
+            <div className='flex flex-row items-center'>
+                <div className='pr-5'>Secondary Background Colour</div>
+                <input className='border-2 border-white cursor-pointer' value={`${settings['bg_secondary_color']}`} type='color' onInput={(e) => {change_settings('bg_secondary_color', (e.target as HTMLInputElement).value)}}/>
+            </div>
+            <div className='flex flex-row items-center'>
+                <div className='pr-5'>Turn Length by Turn Count(t) = </div>
+                <input className='text-black text-lg w-50 border-radius-5 border-white' placeholder={`Default: ${defaults['turn_length_formula']}`} type='text' onInput={(e) => {change_settings('turn_length_formula', (e.target as HTMLInputElement).value)}}/>
             </div>
         </main> 
     )

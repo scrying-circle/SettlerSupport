@@ -9,20 +9,6 @@ export default function TurnBased() {
     const [turn_count, setTurnCount] = useState(0)
     const [barbarian_count, setBarbarianCount] = useState(0)
     const limits = 5
-    /*
-    const [twos, setTwos] = useState(0)
-    const [threes, setThrees] = useState(0)
-    const [fours, setFours] = useState(0)
-    const [fives, setFives] = useState(0)
-    const [sixes, setSixes] = useState(0)
-    const [sevens, setSevens] = useState(0)
-    const [eights, setEights] = useState(0)
-    const [nines, setNines] = useState(0)
-    const [tens, setTens] = useState(0)
-    const [elevens, setElevens] = useState(0)
-    const [twelves, setTwelves] = useState(0)
-    */
-
     function create_deck(remove=0) {
         let output = []
         for (let i = 1; i < 7; i++) {
@@ -75,6 +61,12 @@ export default function TurnBased() {
         if (!alchemist) {
             [white, red] = get_roll(deck)
         }
+        let current_score = sessionStorage.getItem('scores')
+        if (current_score) {
+            let scores = JSON.parse(current_score)
+            scores.push(white + red)
+            sessionStorage.setItem('scores', JSON.stringify(scores))
+        }
         let event = get_event()
         if (event == 'ship') {
             setBarbarianCount(barbarian_count + 1)
@@ -84,32 +76,10 @@ export default function TurnBased() {
         setRedFace(faces[1])
         setEventFace(faces[2])
 
-        /*
-        if (white + red == 2) {
-            setTwos(twos + 1)
-        } else if (white + red == 3) {
-            setThrees(threes + 1)
-        } else if (white + red == 4) {
-            setFours(fours + 1)
-        } else if (white + red == 5) {
-            setFives(fives + 1)
-        } else if (white + red == 6) {
-            setSixes(sixes + 1)
-        } else if (white + red == 7) {
-            setSevens(sevens + 1)
-        } else if (white + red == 8) {
-            setEights(eights + 1)
-        } else if (white + red == 9) {
-            setNines(nines + 1)
-        } else if (white + red == 10) {
-            setTens(tens + 1)
-        } else if (white + red == 11) {
-            setElevens(elevens + 1)
-        } else if (white + red == 12) {
-            setTwelves(twelves + 1)
-        }
-        */
     }
+    useEffect(() => {
+        sessionStorage.setItem('scores', JSON.stringify([]))
+    }, [])
 
 
     return (
@@ -119,21 +89,7 @@ export default function TurnBased() {
                  <div>Turn Count: {turn_count}</div>
                  <div>Barbarian Rating: {Math.round(barbarian_count*20/turn_count)/10}</div>
             </div>
-    {/*
-            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly">
-                <div>2: {twos}</div>
-                <div>3: {threes}</div>
-                <div>4: {fours}</div>
-                <div>5: {fives}</div>
-                <div>6: {sixes}</div>
-                <div>7: {sevens}</div>
-                <div>8: {eights}</div>
-                <div>9: {nines}</div>
-                <div>10: {tens}</div>
-                <div>11: {elevens}</div>
-                <div>12: {twelves}</div>
-            </div>
-    */}
+
             <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly">
                 <div className="scale-50 w-1/3 h-1/3">
                     <img src={white_face} alt='white_face.jpg'/>
