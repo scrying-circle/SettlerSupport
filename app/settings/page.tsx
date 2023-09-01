@@ -4,8 +4,8 @@ import { useAudioPlayer } from 'react-use-audio-player';
 import { useEffect, useRef, useState } from 'react';
 export default function Settings() {
     const { load } = useAudioPlayer()
-    const stored_defaults = localStorage.getItem('settings')
-    const defaults = stored_defaults ? JSON.parse(stored_defaults) : {
+    const didUpdate = useRef(false)
+    const defaults = {
         volume: 5.0,
         bg_primary_color: '#000000',
         bg_secondary_color: '#93c5fd',
@@ -20,9 +20,18 @@ export default function Settings() {
         setSettings({...settings, ...temp});
     }
     useEffect(() => {
-        localStorage.setItem('settings', JSON.stringify(settings))
-        console.log(localStorage.getItem('settings'))
+        if (didUpdate.current) {
+            localStorage.setItem('settings', JSON.stringify(settings))
+        } else {
+            didUpdate.current = true
+        }
     }, [settings])
+    useEffect(() => {
+        let stored_settings = localStorage.getItem('settings')
+        if (stored_settings) {
+            setSettings(JSON.parse(stored_settings))
+        }
+    }, [])
     return (
         <main className="flex min-h-screen flex-col items-center place-content-evenly p-24">
             <Link href="/" className='absolute top-10 left-10'>←</Link>
