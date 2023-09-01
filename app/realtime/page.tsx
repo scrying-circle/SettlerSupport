@@ -83,7 +83,7 @@ export default function RealTime() {
         return output
     }
 
-    const [deck, setDeck] = useState(create_deck(Math.floor(Math.random() * limits)))
+    const deck = useRef(create_deck(Math.floor(Math.random() * limits)))
 
     function bg_animation(timeStamp: number) {
         if (timeStart.current == -1) {
@@ -107,13 +107,15 @@ export default function RealTime() {
 
 
 
-    function get_roll(stack: Array<Array<number>>) {
-        let roll = stack[Math.floor(Math.random() * stack.length)]
-        stack.splice(stack.indexOf(roll), 1)
-        if (stack.length == 0) {
-            stack = create_deck()
+    function get_roll() {
+        let index = Math.floor(Math.random() * deck.current.length)
+        let roll = deck.current[index]
+        console.log(deck.current.length)
+        if (deck.current.length == 1) {
+            deck.current = create_deck()
+        } else {
+            deck.current.splice(index, 1)
         }
-        setDeck(stack)
         return roll
     }
     function get_event() {
@@ -147,8 +149,7 @@ export default function RealTime() {
         }
         
         if (!alchemist.current) {
-            [white, red] = get_roll(deck)
-            
+            [white, red] = get_roll()
         } else {
             alchemist.current = false
         }
