@@ -15,7 +15,6 @@ export default function RealTime() {
         if (stored_defaults) {
             setSettings(JSON.parse(stored_defaults))
         }
-        console.log(settings)
     }, [])
     const [white_face, setWhiteFace] = useState('w1.svg')
     const [red_face, setRedFace] = useState('r1.svg')
@@ -115,7 +114,6 @@ export default function RealTime() {
     function get_roll() {
         let index = Math.floor(Math.random() * deck.current.length)
         let roll = deck.current[index]
-        console.log(deck.current.length)
         if (deck.current.length == 1) {
             deck.current = create_deck()
         } else {
