@@ -38,11 +38,11 @@ export default function Settings() {
             <Link href="/" className='absolute top-10 left-10'>←</Link>
             <div className='flex flex-row items-center'>
                 <div className='pr-5'>Volume</div>
-                <input className='text-black text-xs w-20 border-radius-5 border-white' placeholder={`Default: ${defaults['volume']}`} type='number' onInput={(e) => {change_settings('volume', parseFloat((e.target as HTMLInputElement).value))}}/>
+                <input className='text-black text-xs w-20 border-radius-5 border-white' placeholder={`Current: ${settings['volume']}`} type='number' onInput={(e) => {change_settings('volume', parseFloat((e.target as HTMLInputElement).value))}}/>
                 <img className='ml-5 border-2 border-white w-7 h-7 cursor-pointer' src='\speaker.svg' onClick={() => {
                     load('/bell.wav', {
                     autoplay: true,
-                    initialVolume: settings['volume']
+                    initialVolume: settings['volume'] || defaults['volume'],
                 })}
                 }></img>
             </div>
@@ -56,12 +56,13 @@ export default function Settings() {
             </div>
             <div className='flex flex-row items-center'>
                 <div className='pr-5'>Turn Length by Turn Count(t) = </div>
-                <input className='text-black text-lg w-50 border-radius-5 border-white' placeholder={`Default: ${defaults['turn_length_formula']}`} type='text' onInput={(e) => {change_settings('turn_length_formula', (e.target as HTMLInputElement).value)}}/>
+                <input className='text-black text-lg w-50 border-radius-5 border-white' placeholder={`Current: ${settings['turn_length_formula']}`} type='text' onInput={(e) => {change_settings('turn_length_formula', (e.target as HTMLInputElement).value)}}/>
             </div>
             <div className='flex flex-row items-center'>
                 <div className='pr-5'>Fair Dice: </div>
                 <button onClick={_ => change_settings('fair_dice', !settings['fair_dice'])}>{settings['fair_dice'] ? 'Yes': 'No'}</button>
             </div>
+            <button onClick={_ => setSettings(defaults)}>Reset to Defaults</button>
         </main> 
     )
 }

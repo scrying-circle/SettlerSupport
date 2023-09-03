@@ -67,7 +67,7 @@ export default function RealTime() {
         )
     }
     function time(t: number) {
-        return eval(settings['turn_length_formula']) * 1000
+        return (eval(settings['turn_length_formula']) * 1000) || 30000
     }
     function create_deck(remove: number=0) {
         if (settings['fair_dice']) {
@@ -146,7 +146,7 @@ export default function RealTime() {
                 track_finished.current = true
                 load('/boom.mp3', {
                     autoplay: true,
-                    initialVolume: settings['volume']
+                    initialVolume: settings['volume'] || 5.0
                 })
             }
         }
