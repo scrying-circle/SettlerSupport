@@ -132,10 +132,6 @@ export default function RealTime() {
         turn_time.current = 0;
         window.cancelAnimationFrame(bg_animation_id.current)
         bg_animation_id.current = window.requestAnimationFrame(bg_animation)
-        load('/bell.wav', {
-            autoplay: true,
-            initialVolume: settings['volume']
-        })
         let white = 0
         let red = 0
         let event = get_event()
@@ -148,7 +144,17 @@ export default function RealTime() {
             track.current[ship_position] = true
             if (ship_position == 6) {
                 track_finished.current = true
+                load('/boom.mp3', {
+                    autoplay: true,
+                    initialVolume: settings['volume']
+                })
             }
+        }
+        if (!track_finished.current) {
+            load('/bell.wav', {
+                autoplay: true,
+                initialVolume: settings['volume']
+            })
         }
         
         if (!alchemist.current) {
@@ -214,7 +220,7 @@ export default function RealTime() {
                     <Track />
                  </div>
             </div>
-            <div className="flex min-h-fit min-w-full flex-row items-center justify-evenly z-0">
+            <div className="flex min-h-fit min-w-full flex-row items-center justify-around z-0">
                 <div className="items-center relative" style={{width: '30vh', height: '30vh'}}>
                     <img className='m-0 absolute bottom-[50%] right-[50%] translate-x-1/2 translate-y-1/2 w-full h-full' src={white_face} alt='white_face.jpg'/>
                 </div>
@@ -226,9 +232,9 @@ export default function RealTime() {
                 </div>
             </div>
             <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly z-0">
-                <button onClick={_ => setRolling(!rolling)}>{button_text}</button>
-                <button className={`${alchemist_button ? 'text-green-500': 'text-gray-500'}`} onClick={_ => {setAlchemistButton(true); alchemist.current = true}}>Alchemist</button>
-                <button onClick={_ => setSkip(true)}>Next Roll</button>
+                <button className='w-1/3' onClick={_ => setRolling(!rolling)}>{button_text}</button>
+                <button className={`${alchemist_button ? 'text-green-500': 'text-gray-500'} w-1/3`} onClick={_ => {setAlchemistButton(true); alchemist.current = true}}>Alchemist</button>
+                <button className='w-1/3' onClick={_ => setSkip(true)}>Next Roll</button>
             </div>
         </main>
     )
