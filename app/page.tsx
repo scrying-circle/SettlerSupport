@@ -7,7 +7,8 @@ export default function Home() {
     bg_primary_color: '#000000',
     bg_secondary_color: '#93c5fd',
     turn_length_formula: '30 + t*0',
-    fair_dice: true
+    fair_dice: true,
+    cities_and_knights: false
   }
   useEffect(() => {
     if (localStorage.getItem('settings') === null) {

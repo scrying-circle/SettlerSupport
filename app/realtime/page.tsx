@@ -2,13 +2,19 @@
 import Link from 'next/link'
 import { use, useEffect, useRef, useState } from 'react'
 import { useAudioPlayer } from 'react-use-audio-player';
+import Track from '../components/Track';
+import BackArrow from '../components/BackArrow';
+import TurnCount from '../components/TurnCount';
+import Dice from '../components/Dice';
+import Button from '../components/Button';
 export default function RealTime() {
     const [settings, setSettings] = useState({
         volume: 5.0,
         bg_primary_color: '#000000',
         bg_secondary_color: '#93c5fd',
         turn_length_formula: '30 + t*0',
-        fair_dice: false
+        fair_dice: false,
+        cities_and_knights: false
     })
     useEffect(() => {
         const stored_defaults = localStorage.getItem('settings')
@@ -16,8 +22,8 @@ export default function RealTime() {
             setSettings(JSON.parse(stored_defaults))
         }
     }, [])
-    const [white_face, setWhiteFace] = useState('w1.svg')
-    const [red_face, setRedFace] = useState('r1.svg')
+    const [white_face, setWhiteFace] = useState('1.svg')
+    const [red_face, setRedFace] = useState('1.svg')
     const [event_face, setEventFace] = useState('yellow.svg')
     const [rolling, setRolling] = useState(false)
     const [button_text, setButtonText] = useState('Start')
@@ -35,7 +41,7 @@ export default function RealTime() {
     const [skip, setSkip] = useState(false)
     const limits = 5
 
-    const period = useRef(setTimeout(() => {}, 0))
+    const period = useRef(setTimeout(() => { }, 0))
     const bg_animation_id = useRef(0)
     const pause_time = useRef(-1)
     const bg_color_options = [settings['bg_primary_color'], settings['bg_secondary_color']]
@@ -43,33 +49,13 @@ export default function RealTime() {
 
     const track = useRef([false, false, false, false, false, false, false])
     const track_finished = useRef(false)
-    const track_positions = [[55, 18.3], [60, 25], [65, 18.3], [70, 11.6], [75, 5], [80, 11.6], [85, 18.3]]
     const { load } = useAudioPlayer()
-    
-    function getTrackStyle(index: number) {
-        return {
-            backgroundColor: `${track.current[index] ? 'rgba(248, 113, 113, 0.5)': (index == 6 ? 'rgba(252, 211, 77, 0.3)': 'rgba(203, 213, 225, 0.3)')}`,
-            borderColor: `${track.current[index] ? (index == 6 ? '#fcd34d': '#292524'): '#f8fafc'}`,
-            left: `${track_positions[index][0]}%`,
-            top: `${track_positions[index][1]}%`,
-            width: '8vh',
-            height: '8vh'
-        }
-    }
-    function createTrackSegment(index: number) {
-        return (
-            <div className={`border-solid border-4 rounded-full absolute`} style={getTrackStyle(index)}/>
-        )
-    }
-    function Track() {
-        return (
-            [...Array(7).keys()].map((i) => createTrackSegment(i))
-        )
-    }
+
+
     function time(t: number) {
         return (eval(settings['turn_length_formula']) * 1000) || 30000
     }
-    function create_deck(remove: number=0) {
+    function create_deck(remove: number = 0) {
         if (settings['fair_dice']) {
             let output = []
             for (let i = 1; i <= 6; i++) {
@@ -84,7 +70,7 @@ export default function RealTime() {
         } else {
             return [[Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]]
         }
-        
+
     }
 
     const deck = useRef(create_deck(Math.floor(Math.random() * limits)))
@@ -99,7 +85,7 @@ export default function RealTime() {
             setTurnPercent(turn_time.current / time(turn_count.current) * 100)
             if (turn_time.current < time(turn_count.current)) {
                 bg_animation_id.current = window.requestAnimationFrame(bg_animation);
-            } else {                
+            } else {
                 timeStart.current = -1;
                 prevTime.current = -1;
                 turn_time.current = 0;
@@ -130,11 +116,11 @@ export default function RealTime() {
         timeStart.current = -1;
         prevTime.current = -1;
         turn_time.current = 0;
-        window.cancelAnimationFrame(bg_animation_id.current)
-        bg_animation_id.current = window.requestAnimationFrame(bg_animation)
-        let white = 0
-        let red = 0
-        let event = get_event()
+        window.cancelAnimationFrame(bg_animation_id.current);
+        bg_animation_id.current = window.requestAnimationFrame(bg_animation);
+        let white = 0;
+        let red = 0;
+        let event = settings['cities_and_knights'] ? get_event() : 'yellow';
         if (track_finished.current) {
             track.current = [false, false, false, false, false, false, false]
             track_finished.current = false
@@ -156,14 +142,14 @@ export default function RealTime() {
                 initialVolume: settings['volume']
             })
         }
-        
+
         if (!alchemist.current) {
             [white, red] = get_roll()
         } else {
             alchemist.current = false
         }
-        setWhiteFace(`w${white}.svg`)
-        setRedFace(`r${red}.svg`)
+        setWhiteFace(`${white}.svg`)
+        setRedFace(`${red}.svg`)
         setEventFace(`${event}.svg`)
         setAlchemistButton(false)
         turn_count.current += 1
@@ -211,30 +197,20 @@ export default function RealTime() {
     }, [])
 
     return (
-        <main className={`flex min-h-screen flex-col items-center justify-around p-24 -z-10`} style={{background: `linear-gradient(to right, ${bg_color_options[bg_colors[0]]} ${turn_percent}%, ${bg_color_options[bg_colors[1]]} ${turn_percent}%)`}}>
-            <Link href="/" className='absolute top-10 left-10'>←</Link>
-            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly z-0">
-                 <div>Turn Count: {turn_count.current}</div>
-                 <div className='w-1/3 min-h-fit z-5'>
-                    <div className='border-solid border-4 border-slate-50 rounded-full bg-stone-800/80 absolute left-[50%] top-[11.6%]' style={{width: '8vh', height: '8vh'}}/>
-                    <Track />
-                 </div>
+        <main className={`grid min-h-screen grid-cols-3 items-center justify-around p-24 -z-10`} style={{ background: `linear-gradient(to right, ${bg_color_options[bg_colors[0]]} ${turn_percent}%, ${bg_color_options[bg_colors[1]]} ${turn_percent}%)` }}>
+            <BackArrow href='/' />
+
+            <div className='col-span-3 flex flex-box items-center place-content-evenly'>
+                <TurnCount turn_count={turn_count.current} />
+                <Track track={track.current} enabled={settings['cities_and_knights']} />
             </div>
-            <div className="flex min-h-fit min-w-full flex-row items-center justify-around z-0">
-                <div className="items-center relative" style={{width: '30vh', height: '30vh'}}>
-                    <img className='m-0 absolute bottom-[50%] right-[50%] translate-x-1/2 translate-y-1/2 w-full h-full' src={white_face} alt='white_face.jpg'/>
-                </div>
-                <div className="items-center relative" style={{width: '30vh', height: '30vh'}}>
-                    <img className='m-0 absolute bottom-[50%] right-[50%] translate-x-1/2 translate-y-1/2 w-full h-full' src={red_face} alt='red_face.jpg'/>
-                </div>
-                <div className="items-center bg-[url('/bg.svg')] bg-cover text-center bg-center relative" style={{width: '30vh', height: '30vh'}}>
-                    <img className='m-0 absolute bottom-[50%] right-[50%] translate-x-1/2 translate-y-1/2' style={{width: '20vh', height: '20vh'}} src={event_face} alt='event_face.jpg'/>
-                </div>
-            </div>
-            <div className="flex min-h-fit min-w-full flex-row items-center place-content-evenly z-0">
-                <button className='w-1/3' onClick={_ => setRolling(!rolling)}>{button_text}</button>
-                <button className={`${alchemist_button ? 'text-green-500': 'text-gray-500'} w-1/3`} onClick={_ => {setAlchemistButton(true); alchemist.current = true}}>Alchemist</button>
-                <button className='w-1/3' onClick={_ => setSkip(true)}>Next Roll</button>
+
+            <Dice src={[white_face, red_face, event_face]} cities_and_knights={settings['cities_and_knights']} />
+            
+            <div className='col-span-3 flex flex-box items-center place-content-evenly'>
+                <Button onClick={() => setRolling(!rolling)} enabled={true}>{button_text}</Button>
+                <Button className={`${alchemist_button ? 'text-green-500' : 'text-gray-500'}`} onClick={() => { setAlchemistButton(true); alchemist.current = true }} enabled={settings['cities_and_knights']}>Alchemist</Button>
+                <Button onClick={() => setSkip(true)} enabled={true} >Next Roll</Button>
             </div>
         </main>
     )

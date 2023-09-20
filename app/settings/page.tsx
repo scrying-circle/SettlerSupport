@@ -10,7 +10,8 @@ export default function Settings() {
         bg_primary_color: '#000000',
         bg_secondary_color: '#93c5fd',
         turn_length_formula: '30 + t*0',
-        fair_dice: true
+        fair_dice: true,
+        cities_and_knights: false
     }
     const [settings, setSettings] = useState(defaults);
     function change_settings(field: string, value: number | string | boolean) {
@@ -45,6 +46,10 @@ export default function Settings() {
                     initialVolume: settings['volume'] || defaults['volume'],
                 })}
                 }></img>
+            </div>
+            <div className='flex flex-row items-center'>
+                <div className='pr-5'>Cities and Knights features: </div>
+                <button onClick={_ => change_settings('cities_and_knights', !settings['cities_and_knights'])}>{settings['cities_and_knights'] ? 'Yes': 'No'}</button>
             </div>
             <div className='flex flex-row items-center'>
                 <div className='pr-5'>Primary Background Colour</div>
