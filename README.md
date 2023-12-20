@@ -4,7 +4,8 @@ This is a web application to help administrate the board game "Settlers of Catan
 # Pages
 ## Real Time
 This page opens the UI for the real time configuration of the app. Play is continuous from the first time Start is pressed, excluding Pauses. The Alchemist button should be pressed when a player plays an Alchemist. The next roll with show X's as the numerical dice, at which point the player who played the card must specify the numbers instead. Next Roll immediately advances the to the next turn; this is generally when all players have finished their actions, and given more time would simply wait for it to pass. The UI tracks ship movements, and will play an audio cue when it arrives at Catan. This is the only page that is affected by the settings determined in the Settings page, as it is only here that the simplest UI is insufficient. The Fair Dice option is also shared with the Turn Based gamemode.
-###Pausing should ideally be minimised, but it is common to use it for robberies and when the Barbarians reach Catan in Cities and Knights.
+### Pausing should ideally be minimised, but it is common to use it for robberies and when the Barbarians reach Catan in Cities and Knights.
+
 ## Turn Based
 This page opens the UI for the turn based configuration of the app. Roll Event is used when we only want the Event die to be rolled; that is, when after an Alchemist is played. Otherwise, simply press Roll Dice to roll for each player.
 ## Game Stats
