@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link'
 import { use, useEffect } from 'react'
+import GitHubButton from './components/GitHubButton'
 export default function Home() {
   const defaults = {
     volume: 5.0,
@@ -21,6 +22,7 @@ export default function Home() {
       <Link href="/turnbased">Turn by Turn</Link>
       <Link href="/stats">Game Stats</Link>
       <Link href="/settings">Settings</Link>
+      <GitHubButton />
     </main>
   )
 }
