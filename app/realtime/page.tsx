@@ -157,7 +157,9 @@ export default function RealTime() {
             alchemist.current = false
             autoPause()
             setEventFace('no_event.svg')
-            isAlching.current = `${event}.svg`
+            setTimeout(() => {
+                isAlching.current = `${event}.svg`
+            }, 250)
         }
         setWhiteFace(`${white}.svg`)
         setRedFace(`${red}.svg`)
