@@ -51,6 +51,11 @@ export default function RealTime() {
     const track_finished = useRef(false)
     const { load } = useAudioPlayer()
 
+    function autoPause() {
+        setTimeout(() => {
+            setRolling(false)
+        }, 200)
+    }
 
     function time(t: number) {
         return (eval(settings['turn_length_formula']) * 1000) || 30000
@@ -134,6 +139,7 @@ export default function RealTime() {
                     autoplay: true,
                     initialVolume: settings['volume'] || 5.0
                 })
+                autoPause()
             }
         }
         if (!track_finished.current) {
@@ -145,13 +151,24 @@ export default function RealTime() {
 
         if (!alchemist.current) {
             [white, red] = get_roll()
+            setEventFace(`${event}.svg`)
         } else {
             alchemist.current = false
+            autoPause()
+            setEventFace('no_event.svg')
+            setTimeout(() => {
+                setEventFace(`${event}.svg`)
+            }, 600)
         }
         setWhiteFace(`${white}.svg`)
         setRedFace(`${red}.svg`)
-        setEventFace(`${event}.svg`)
+
         setAlchemistButton(false)
+
+        if (white + red == 7) {
+            autoPause()
+        }
+
         turn_count.current += 1
         let current_score = sessionStorage.getItem('scores')
         if (current_score) {
