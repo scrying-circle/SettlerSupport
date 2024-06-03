@@ -39,6 +39,7 @@ export default function RealTime() {
 
 
     const [skip, setSkip] = useState(false)
+    const isAlching = useRef('event')
     const limits = 5
 
     const period = useRef(setTimeout(() => { }, 0))
@@ -156,9 +157,7 @@ export default function RealTime() {
             alchemist.current = false
             autoPause()
             setEventFace('no_event.svg')
-            setTimeout(() => {
-                setEventFace(`${event}.svg`)
-            }, 600)
+            isAlching.current = `${event}.svg`
         }
         setWhiteFace(`${white}.svg`)
         setRedFace(`${red}.svg`)
@@ -197,6 +196,10 @@ export default function RealTime() {
             setButtonText('Start')
             window.cancelAnimationFrame(bg_animation_id.current)
             if (pause_time.current != -1) pause_time.current = performance.now()
+            if (isAlching.current != 'event') {
+                setEventFace(isAlching.current)
+                isAlching.current = 'event'
+            }
         }
     }, [rolling])
 
