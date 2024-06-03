@@ -186,6 +186,10 @@ export default function RealTime() {
     useEffect(() => {
         if (rolling) {
             setButtonText('Pause')
+            if (isAlching.current != 'event') {
+                setEventFace(isAlching.current)
+                isAlching.current = 'event'
+            }
             if (pause_time.current == -1) {
                 pause_time.current = performance.now()
             }
@@ -198,10 +202,6 @@ export default function RealTime() {
             setButtonText('Start')
             window.cancelAnimationFrame(bg_animation_id.current)
             if (pause_time.current != -1) pause_time.current = performance.now()
-            if (isAlching.current != 'event') {
-                setEventFace(isAlching.current)
-                isAlching.current = 'event'
-            }
         }
     }, [rolling])
 
