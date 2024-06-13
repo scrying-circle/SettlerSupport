@@ -9,7 +9,8 @@ export default function Home() {
     bg_secondary_color: '#93c5fd',
     turn_length_formula: '30 + t*0',
     fair_dice: true,
-    cities_and_knights: false
+    cities_and_knights: false,
+    auto_pause: true
   }
   useEffect(() => {
     if (localStorage.getItem('settings') === null) {

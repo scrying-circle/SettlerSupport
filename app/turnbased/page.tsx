@@ -19,7 +19,8 @@ export default function TurnBased() {
         bg_secondary_color: '#93c5fd',
         turn_length_formula: '30 + t*0',
         fair_dice: false,
-        cities_and_knights: false
+        cities_and_knights: false,
+        auto_pause: true
     })
     function create_deck(remove = 0) {
         let output = []
@@ -92,7 +93,6 @@ export default function TurnBased() {
         setWhiteFace(faces[0])
         setRedFace(faces[1])
         setEventFace(faces[2])
-
     }
     useEffect(() => {
         sessionStorage.setItem('scores', JSON.stringify([]))

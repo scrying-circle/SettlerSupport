@@ -11,7 +11,8 @@ export default function Settings() {
         bg_secondary_color: '#93c5fd',
         turn_length_formula: '30 + t*0',
         fair_dice: true,
-        cities_and_knights: false
+        cities_and_knights: false,
+        auto_pause: true
     }
     const [settings, setSettings] = useState(defaults);
     function change_settings(field: string, value: number | string | boolean) {
@@ -65,7 +66,11 @@ export default function Settings() {
             </div>
             <div className='flex flex-row items-center'>
                 <div className='pr-5'>Fair Dice: </div>
-                <button onClick={_ => change_settings('fair_dice', !settings['fair_dice'])}>{settings['fair_dice'] ? 'Yes': 'No'}</button>
+                <button onClick={_ => change_settings('fair_dice', !settings['fair_dice'])}>{settings['fair_dice'] ? 'On': 'Off'}</button>
+            </div>
+            <div className='flex flex-row items-center'>
+                <div className='pr-5'>Auto-Pause on 7 and Barbarian Attack: </div>
+                <button onClick={_ => change_settings('auto_pause', !settings['auto_pause'])}>{settings['auto_pause'] ? 'On': 'Off'}</button>
             </div>
             <button onClick={_ => setSettings(defaults)}>Reset to Defaults</button>
         </main> 

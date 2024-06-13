@@ -14,7 +14,8 @@ export default function RealTime() {
         bg_secondary_color: '#93c5fd',
         turn_length_formula: '30 + t*0',
         fair_dice: false,
-        cities_and_knights: false
+        cities_and_knights: false,
+        auto_pause: true
     })
     useEffect(() => {
         const stored_defaults = localStorage.getItem('settings')
@@ -140,7 +141,9 @@ export default function RealTime() {
                     autoplay: true,
                     initialVolume: settings['volume'] || 5.0
                 })
-                autoPause()
+                if (settings['auto_pause']) {
+                    autoPause()
+                }
             }
         }
         if (!track_finished.current) {
@@ -153,6 +156,9 @@ export default function RealTime() {
         if (!alchemist.current) {
             [white, red] = get_roll()
             setEventFace(`${event}.svg`)
+            if (white + red == 7 && settings['auto_pause']) {
+                autoPause()
+            }
         } else {
             alchemist.current = false
             autoPause()
@@ -164,11 +170,9 @@ export default function RealTime() {
         setWhiteFace(`${white}.svg`)
         setRedFace(`${red}.svg`)
 
+
         setAlchemistButton(false)
 
-        if (white + red == 7) {
-            autoPause()
-        }
 
         turn_count.current += 1
         let current_score = sessionStorage.getItem('scores')
@@ -202,6 +206,10 @@ export default function RealTime() {
             setButtonText('Start')
             window.cancelAnimationFrame(bg_animation_id.current)
             if (pause_time.current != -1) pause_time.current = performance.now()
+            if (isAlching.current != 'event') {
+                setEventFace(isAlching.current)
+                isAlching.current = 'event'
+            }
         }
     }, [rolling])
 
