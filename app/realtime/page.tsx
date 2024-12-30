@@ -112,6 +112,7 @@ export default function RealTime() {
         } else {
             deck.current.splice(index, 1)
         }
+        console.log("turn: ", turn_count.current, " - roll: ", roll)
         return roll
     }
     function get_event() {
